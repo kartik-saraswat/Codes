@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <queue>
 #include <stack>
 #include <vector>
@@ -57,6 +58,21 @@ class Node{
 				return max(leftHeight + rightHeight + 1, max(leftDiameter, rightDiameter));
 			}
 		}
+		
+		static void width_recursive(Node *p, vector<int>& counter, int level){
+			if(p!=NULL){
+				counter[level]++;
+				width_recursive(p->left, counter, level+1);
+				width_recursive(p->right, counter, level+1);
+			}
+		}
+		
+		int width(){
+			int h = height();
+			vector<int> counter(h,0);
+			width_recursive(this, counter, 0);
+			return *max_element(counter.begin(), counter.end());
+		}
 };
 
 class BinaryTree{
@@ -69,6 +85,19 @@ class BinaryTree{
 		BinaryTree(Node *root){
 			this->root=root;
 		}
+		
+		int height(){
+			return root->height();
+		}
+		
+		int diameter(){
+			return root->diameter();
+		}
+		
+		int width(){
+			root->width();
+		}
+
 		
 		static void dfsTraversal(Node *root){
 			if(root!=NULL){
@@ -95,14 +124,6 @@ class BinaryTree{
 						}
 					}
 			}
-		}
-		
-		int height(){
-			return root->height();
-		}
-		
-		int diameter(){
-			return root->diameter();
 		}
 		
 		static void inorderTraversal(Node* root){
@@ -224,10 +245,32 @@ class BinaryTree{
 			}
 		}	
 	}
+	
+	static int search(const vector<int>& v, int i , int j, int item){
+		while(i<=j){
+			if(v[i]==item)
+				return i;
+			i++;
+		}
+	   return -1;	
+	}
+	
+	static Node* construct( vector<int>& in,int v1, int v2, vector<int>& pre, int p1, int p2){		
+		Node *root = new Node(pre[p1]);
+		if(v1 < v2){
+			int pos = search(in, v1, v2, pre[p1]);
+			int x = pos-v1;	
+			root->left = construct(in, v1, pos-1,pre, p1+1, p1+ x);
+			root->right = construct(in, pos+1, v2,pre, p1+x+1, p2);
+		}
+		return root;
+	}
 };
 
+
+
 int main(){
-	
+	// Binary Tree
 	Node * root = new Node(1);
 	Node * p = root->addChild(2);
 	Node * q = root->addChild(3);
@@ -235,11 +278,11 @@ int main(){
 	p->addChild(5);
 	q->addChild(6);
 	q->addChild(7);
-	/*r->right = r->addChild(8);
+	r->right = r->addChild(8);
 	r->left = NULL;
 	r->right->addChild(9);
 	r->right->addChild(10);
-	*/
-	BinaryTree::morrisPostorderTraversal(root);
+	
+	cout<<" "<<root->width();
 	return 0;
 }
